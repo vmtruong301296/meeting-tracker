@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { @apply h-full; }
+  body {
+    @apply bg-ink-950 text-cream-100 font-sans antialiased;
+    background: radial-gradient(ellipse at top, #1a1a1d 0%, #0a0a0b 60%);
+  }
+  ::selection { @apply bg-amber-gold text-ink-950; }
+  input:focus, textarea:focus, select:focus {
+    outline: 2px solid rgba(212, 165, 116, 0.5);
+    outline-offset: 1px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded font-semibold text-xs tracking-wide
+           bg-amber-gold text-ink-950 hover:brightness-110 transition;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-2 rounded border border-white/10
+           text-xs text-cream-100 hover:bg-white/5 transition;
+  }
+  .btn-mini {
+    @apply inline-flex items-center gap-1 p-1.5 rounded border border-white/10
+           text-cream-100/70 hover:bg-white/5 transition;
+  }
+  .input {
+    @apply w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-cream-100;
+  }
+  .label {
+    @apply block font-mono text-[10px] tracking-[0.18em] uppercase text-cream-100/50 mb-1.5;
+  }
+  .card {
+    @apply bg-white/[0.02] border border-white/5 rounded-md;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeIn 0.25s ease-out; }

@@ -1,0 +1,112 @@
+// Prisma schema for Meeting Tracker
+// MySQL database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  ISSUE
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedMeetings Meeting[]      @relation("MeetingOwner")
+  members       Member[]       @relation("MemberUser")
+  comments      TaskComment[]
+}
+
+model Meeting {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  title     String?  @db.VarChar(200)
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner  User    @relation("MeetingOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  groups Group[]
+
+  @@index([ownerId, date])
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(120)
+  position  Int      @default(0)
+  collapsed Boolean  @default(false)
+  meetingId String
+  createdAt DateTime @default(now())
+
+  meeting Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  members Member[]
+
+  @@index([meetingId, position])
+}
+
+model Member {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(120)
+  position  Int      @default(0)
+  groupId   String
+  userId    String?  // optional link to a User account (for assignment)
+  createdAt DateTime @default(now())
+
+  group Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User?  @relation("MemberUser", fields: [userId], references: [id], onDelete: SetNull)
+  tasks Task[]
+
+  @@index([groupId, position])
+  @@index([userId])
+}
+
+model Task {
+  id        String     @id @default(cuid())
+  title     String     @db.VarChar(500)
+  note      String?    @db.Text
+  status    TaskStatus @default(TODO)
+  position  Int        @default(0)
+  memberId  String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  member   Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  comments TaskComment[]
+
+  @@index([memberId, position])
+  @@index([status])
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, createdAt])
+}
