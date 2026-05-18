@@ -4,17 +4,19 @@ export function ProgressRing({ pct, size = 48 }: { pct: number; size?: number })
   const offset = c - (pct / 100) * c;
   const cx = size / 2;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="text-accent">
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--bg-elev-3)" strokeWidth="3" />
       <circle
         cx={cx} cy={cx} r={r} fill="none"
-        stroke="#d4a574" strokeWidth="3"
+        stroke="currentColor" strokeWidth="3"
         strokeDasharray={c} strokeDashoffset={offset}
         strokeLinecap="round" transform={`rotate(-90 ${cx} ${cx})`}
         style={{ transition: 'stroke-dashoffset 0.5s ease' }}
       />
-      <text x={cx} y={cx + 4} textAnchor="middle" fontSize="11"
-            fontFamily="Fraunces, serif" fontStyle="italic" fill="#d4a574">
+      <text
+        x={cx} y={cx + 4} textAnchor="middle" fontSize="11"
+        fontFamily="Fraunces, serif" fontStyle="italic" fill="currentColor"
+      >
         {pct}
       </text>
     </svg>

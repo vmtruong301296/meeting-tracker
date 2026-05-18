@@ -19,14 +19,16 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/70 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-5 backdrop-blur-sm animate-fadeIn"
+      style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-ink-900 border border-white/10 rounded-md max-h-[85vh] overflow-auto"
+        className="w-full max-w-md rounded-md max-h-[85vh] overflow-auto bg-modal"
+        style={{ border: '1px solid var(--border)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center px-5 py-4 border-b border-white/5">
+        <div className="flex justify-between items-center px-5 py-4 border-b border-subtle">
           <h3 className="font-serif text-xl italic">{title}</h3>
           <button className="btn-mini" onClick={onClose}><X size={14} /></button>
         </div>
@@ -36,7 +38,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   );
 }
 
-// ---- Imperative prompt/confirm via context-less approach ----
+// ---- Imperative prompt/confirm ----
 type DialogState =
   | { type: 'prompt'; title: string; placeholder?: string; defaultValue?: string; resolve: (v: string | null) => void }
   | { type: 'confirm'; title: string; message?: string; resolve: (v: boolean) => void }
@@ -90,12 +92,10 @@ export function DialogRoot() {
           placeholder={dialog.placeholder}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') close(value.trim() || null);
-          }}
+          onKeyDown={(e) => { if (e.key === 'Enter') close(value.trim() || null); }}
         />
       ) : (
-        dialog.message && <p className="text-sm text-cream-100/70 mb-4">{dialog.message}</p>
+        dialog.message && <p className="text-sm text-muted mb-4">{dialog.message}</p>
       )}
       <div className="flex justify-end gap-2">
         <button className="btn-ghost" onClick={() => close(dialog.type === 'prompt' ? null : false)}>

@@ -2,45 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Theme tokens ===== */
+:root {
+  /* default = dark */
+  --bg-grad-from: #1a1a1d;
+  --bg-grad-to: #0a0a0b;
+  --bg-base: #0a0a0b;
+  --bg-elev-1: rgba(255, 255, 255, 0.02);
+  --bg-elev-2: rgba(255, 255, 255, 0.04);
+  --bg-elev-3: rgba(255, 255, 255, 0.06);
+  --bg-modal: #15151a;
+  --text-base: #e8e6e0;
+  --text-muted: rgba(232, 230, 224, 0.5);
+  --text-faint: rgba(232, 230, 224, 0.35);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --accent: #d4a574;
+  --accent-deep: #8b6841;
+  --accent-on: #0a0a0b; /* text color on top of accent */
+}
+
+[data-theme='light'] {
+  --bg-grad-from: #fdfcfa;
+  --bg-grad-to: #f1ede4;
+  --bg-base: #faf8f3;
+  --bg-elev-1: rgba(0, 0, 0, 0.025);
+  --bg-elev-2: rgba(0, 0, 0, 0.05);
+  --bg-elev-3: rgba(0, 0, 0, 0.08);
+  --bg-modal: #ffffff;
+  --text-base: #1a1410;
+  --text-muted: rgba(26, 20, 16, 0.55);
+  --text-faint: rgba(26, 20, 16, 0.35);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border: rgba(0, 0, 0, 0.12);
+  --accent: #a16a35;
+  --accent-deep: #6b4420;
+  --accent-on: #ffffff;
+}
+
 @layer base {
   html, body, #root { @apply h-full; }
   body {
-    @apply bg-ink-950 text-cream-100 font-sans antialiased;
-    background: radial-gradient(ellipse at top, #1a1a1d 0%, #0a0a0b 60%);
+    color: var(--text-base);
+    background: radial-gradient(ellipse at top, var(--bg-grad-from) 0%, var(--bg-grad-to) 60%);
+    @apply font-sans antialiased;
   }
-  ::selection { @apply bg-amber-gold text-ink-950; }
+  ::selection { background: var(--accent); color: var(--accent-on); }
   input:focus, textarea:focus, select:focus {
-    outline: 2px solid rgba(212, 165, 116, 0.5);
+    outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
     outline-offset: 1px;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center gap-1.5 px-3.5 py-2 rounded font-semibold text-xs tracking-wide
-           bg-amber-gold text-ink-950 hover:brightness-110 transition;
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.5rem 0.875rem; border-radius: 0.25rem;
+    font-weight: 600; font-size: 0.75rem; letter-spacing: 0.025em;
+    background: var(--accent); color: var(--accent-on);
+    transition: filter 0.15s;
   }
+  .btn-primary:hover { filter: brightness(1.1); }
+
   .btn-ghost {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-2 rounded border border-white/10
-           text-xs text-cream-100 hover:bg-white/5 transition;
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.5rem 0.625rem; border-radius: 0.25rem;
+    border: 1px solid var(--border); font-size: 0.75rem;
+    color: var(--text-base);
+    transition: background 0.15s;
   }
+  .btn-ghost:hover { background: var(--bg-elev-2); }
+
   .btn-mini {
-    @apply inline-flex items-center gap-1 p-1.5 rounded border border-white/10
-           text-cream-100/70 hover:bg-white/5 transition;
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.375rem; border-radius: 0.25rem;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    transition: background 0.15s;
   }
+  .btn-mini:hover { background: var(--bg-elev-2); color: var(--text-base); }
+
   .input {
-    @apply w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-cream-100;
+    width: 100%;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-base);
   }
+
   .label {
-    @apply block font-mono text-[10px] tracking-[0.18em] uppercase text-cream-100/50 mb-1.5;
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.375rem;
   }
+
   .card {
-    @apply bg-white/[0.02] border border-white/5 rounded-md;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.375rem;
   }
 }
+
+/* Utility classes using vars */
+.text-accent { color: var(--accent); }
+.text-muted { color: var(--text-muted); }
+.text-faint { color: var(--text-faint); }
+.bg-elev-1 { background: var(--bg-elev-1); }
+.bg-elev-2 { background: var(--bg-elev-2); }
+.bg-elev-3 { background: var(--bg-elev-3); }
+.bg-modal { background: var(--bg-modal); }
+.border-subtle { border-color: var(--border-subtle); }
+.border-base { border-color: var(--border); }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fadeIn { animation: fadeIn 0.25s ease-out; }
+
+/* Group color palette — used by GroupBlock */
+.gc-amber  { --gc: #d4a574; }
+.gc-rose   { --gc: #e25563; }
+.gc-emerald{ --gc: #10b981; }
+.gc-sky    { --gc: #38bdf8; }
+.gc-violet { --gc: #a78bfa; }
+.gc-slate  { --gc: #94a3b8; }
+.gc-bar    { background: var(--gc); }
+.gc-text   { color: var(--gc); }
+.gc-bg     { background: color-mix(in srgb, var(--gc) 12%, transparent); }
+.gc-border { border-color: color-mix(in srgb, var(--gc) 35%, transparent); }

@@ -4,9 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { 950: '#0a0a0b', 900: '#15151a', 800: '#1f1f24' },
-        cream: { 100: '#e8e6e0', 200: '#d4d2cc' },
-        amber: { gold: '#d4a574', deep: '#8b6841' },
+        // Surfaces — auto-flip via CSS vars
+        bg:        'rgb(var(--bg) / <alpha-value>)',
+        surface:   'rgb(var(--surface) / <alpha-value>)',
+        surface2:  'rgb(var(--surface-2) / <alpha-value>)',
+        border:    'rgb(var(--border) / <alpha-value>)',
+        text:      'rgb(var(--text) / <alpha-value>)',
+        muted:     'rgb(var(--muted) / <alpha-value>)',
+        accent:    'rgb(var(--accent) / <alpha-value>)',
+        accentSoft:'rgb(var(--accent-soft) / <alpha-value>)',
+        // Legacy keys still used
+        'amber-gold': 'rgb(var(--accent) / <alpha-value>)',
+        'amber-deep': 'rgb(var(--accent-2) / <alpha-value>)',
       },
       fontFamily: {
         serif: ['Fraunces', 'serif'],

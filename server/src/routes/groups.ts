@@ -16,15 +16,18 @@ async function checkGroupAccess(groupId: string, userId: string, role: string) {
   return 'ok';
 }
 
+const GROUP_COLORS = ['amber', 'rose', 'emerald', 'sky', 'violet', 'slate'] as const;
+
 const createSchema = z.object({
   meetingId: z.string(),
   name: z.string().min(1).max(120),
+  color: z.enum(GROUP_COLORS).optional(),
   position: z.number().int().optional(),
 });
 
 router.post('/', async (req, res, next) => {
   try {
-    const { meetingId, name, position } = createSchema.parse(req.body);
+    const { meetingId, name, color, position } = createSchema.parse(req.body);
     const m = await prisma.meeting.findUnique({ where: { id: meetingId }, select: { ownerId: true } });
     if (!m) return res.status(404).json({ error: 'Meeting not found' });
     if (req.user!.role !== 'ADMIN' && m.ownerId !== req.user!.userId) {
@@ -32,7 +35,7 @@ router.post('/', async (req, res, next) => {
     }
     const count = await prisma.group.count({ where: { meetingId } });
     const group = await prisma.group.create({
-      data: { meetingId, name, position: position ?? count },
+      data: { meetingId, name, color: color ?? 'amber', position: position ?? count },
       include: { members: { include: { tasks: true } } },
     });
     res.status(201).json({ group });
@@ -43,6 +46,7 @@ router.post('/', async (req, res, next) => {
 
 const updateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
+  color: z.enum(GROUP_COLORS).optional(),
   collapsed: z.boolean().optional(),
   position: z.number().int().optional(),
 });

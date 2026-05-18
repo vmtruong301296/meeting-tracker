@@ -23,17 +23,24 @@ enum TaskStatus {
   CANCELLED
 }
 
+enum Theme {
+  DARK
+  LIGHT
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
   password  String
   role      Role     @default(MEMBER)
+  theme     Theme    @default(DARK)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   ownedMeetings Meeting[]      @relation("MeetingOwner")
   members       Member[]       @relation("MemberUser")
+  assignedTasks Task[]         @relation("TaskAssignee")
   comments      TaskComment[]
 }
 
@@ -54,6 +61,7 @@ model Meeting {
 model Group {
   id        String   @id @default(cuid())
   name      String   @db.VarChar(120)
+  color     String   @default("amber") @db.VarChar(20) // amber|rose|emerald|sky|violet|slate
   position  Int      @default(0)
   collapsed Boolean  @default(false)
   meetingId String
@@ -70,7 +78,7 @@ model Member {
   name      String   @db.VarChar(120)
   position  Int      @default(0)
   groupId   String
-  userId    String?  // optional link to a User account (for assignment)
+  userId    String?
   createdAt DateTime @default(now())
 
   group Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
@@ -82,20 +90,30 @@ model Member {
 }
 
 model Task {
-  id        String     @id @default(cuid())
-  title     String     @db.VarChar(500)
-  note      String?    @db.Text
-  status    TaskStatus @default(TODO)
-  position  Int        @default(0)
-  memberId  String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id           String     @id @default(cuid())
+  title        String     @db.VarChar(500)
+  note         String?    @db.Text
+  status       TaskStatus @default(TODO)
+  position     Int        @default(0)
+  memberId     String
+  parentId     String?    // self-referential: null = top-level task, else a sub-task
+  assigneeId   String?    // user responsible
+  assigneeNote String?    @db.Text // private note from/to the assignee
+  deadline     DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   member   Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  parent   Task?         @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks Task[]        @relation("TaskSubtasks")
+  assignee User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   comments TaskComment[]
 
   @@index([memberId, position])
+  @@index([parentId, position])
   @@index([status])
+  @@index([assigneeId])
+  @@index([deadline])
 }
 
 model TaskComment {

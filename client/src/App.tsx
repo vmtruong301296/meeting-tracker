@@ -9,7 +9,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   if (loading) {
     return (
-      <div className="min-h-full flex items-center justify-center text-amber-gold font-mono text-sm">
+      <div className="min-h-full flex items-center justify-center text-accent font-mono text-sm">
         Loading…
       </div>
     );

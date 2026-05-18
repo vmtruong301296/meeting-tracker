@@ -6,6 +6,38 @@ import { requireAuth } from '../middleware/auth';
 const router = Router();
 router.use(requireAuth);
 
+// Recursive subtask include — supports 3 levels of nesting (enough for most cases)
+const subtaskInclude = {
+  orderBy: { position: 'asc' as const },
+  include: {
+    assignee: { select: { id: true, name: true } },
+    comments: {
+      orderBy: { createdAt: 'asc' as const },
+      include: { author: { select: { id: true, name: true } } },
+    },
+    subtasks: {
+      orderBy: { position: 'asc' as const },
+      include: {
+        assignee: { select: { id: true, name: true } },
+        comments: {
+          orderBy: { createdAt: 'asc' as const },
+          include: { author: { select: { id: true, name: true } } },
+        },
+        subtasks: {
+          orderBy: { position: 'asc' as const },
+          include: {
+            assignee: { select: { id: true, name: true } },
+            comments: {
+              orderBy: { createdAt: 'asc' as const },
+              include: { author: { select: { id: true, name: true } } },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const fullInclude = {
   groups: {
     orderBy: { position: 'asc' as const },
@@ -13,14 +45,10 @@ const fullInclude = {
       members: {
         orderBy: { position: 'asc' as const },
         include: {
+          user: { select: { id: true, name: true } },
           tasks: {
-            orderBy: { position: 'asc' as const },
-            include: {
-              comments: {
-                orderBy: { createdAt: 'asc' as const },
-                include: { author: { select: { id: true, name: true } } },
-              },
-            },
+            where: { parentId: null }, // only top-level; subtasks come via nested include
+            ...subtaskInclude,
           },
         },
       },
@@ -101,16 +129,61 @@ router.post('/', async (req, res, next) => {
           where: { id: carryOverFromId },
           include: {
             groups: {
-              include: { members: { include: { tasks: true } } },
               orderBy: { position: 'asc' },
+              include: {
+                members: {
+                  orderBy: { position: 'asc' },
+                  include: {
+                    tasks: {
+                      where: { parentId: null },
+                      orderBy: { position: 'asc' },
+                      include: {
+                        subtasks: {
+                          orderBy: { position: 'asc' },
+                          include: { subtasks: { orderBy: { position: 'asc' } } },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         });
+
+        const cloneTaskTree = async (
+          task: { title: string; note: string | null; status: any; deadline: Date | null; assigneeId: string | null; assigneeNote: string | null; subtasks?: any[] },
+          memberId: string,
+          parentId: string | null,
+          position: number,
+        ): Promise<void> => {
+          if (task.status === 'DONE' || task.status === 'CANCELLED') return;
+          const created = await tx.task.create({
+            data: {
+              title: task.title,
+              note: task.note,
+              status: task.status,
+              deadline: task.deadline,
+              assigneeId: task.assigneeId,
+              assigneeNote: task.assigneeNote,
+              position,
+              memberId,
+              parentId,
+            },
+          });
+          for (const [i, sub] of (task.subtasks || []).entries()) {
+            await cloneTaskTree(sub, memberId, created.id, i);
+          }
+        };
+
         if (src && (req.user!.role === 'ADMIN' || src.ownerId === req.user!.userId)) {
           for (const [gi, g] of src.groups.entries()) {
             const newG = await tx.group.create({
               data: {
-                name: g.name, position: gi, collapsed: g.collapsed,
+                name: g.name,
+                color: g.color,
+                position: gi,
+                collapsed: g.collapsed,
                 meetingId: created.id,
               },
             });
@@ -119,13 +192,8 @@ router.post('/', async (req, res, next) => {
                 data: { name: m.name, position: mi, groupId: newG.id, userId: m.userId },
               });
               const pending = m.tasks.filter((t) => t.status !== 'DONE' && t.status !== 'CANCELLED');
-              if (pending.length) {
-                await tx.task.createMany({
-                  data: pending.map((t, ti) => ({
-                    title: t.title, note: t.note, status: t.status,
-                    position: ti, memberId: newM.id,
-                  })),
-                });
+              for (const [ti, t] of pending.entries()) {
+                await cloneTaskTree(t, newM.id, null, ti);
               }
             }
           }

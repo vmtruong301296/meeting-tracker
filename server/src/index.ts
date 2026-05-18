@@ -9,6 +9,7 @@ import meetingRoutes from './routes/meetings';
 import groupRoutes from './routes/groups';
 import memberRoutes from './routes/members';
 import taskRoutes from './routes/tasks';
+import userRoutes from './routes/users';
 import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
@@ -43,6 +44,7 @@ app.use('/meetings', meetingRoutes);
 app.use('/groups', groupRoutes);
 app.use('/members', memberRoutes);
 app.use('/tasks', taskRoutes);
+app.use('/users', userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

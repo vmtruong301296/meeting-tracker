@@ -33,11 +33,11 @@ export default function AuthPage({ mode }: Props) {
     <div className="min-h-full flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="font-mono text-[10px] tracking-[0.18em] uppercase text-amber-gold mb-2">
+          <div className="font-mono text-[10px] tracking-[0.18em] uppercase text-accent mb-2">
             meeting tracker
           </div>
           <h1 className="font-serif text-4xl">
-            <span className="italic text-amber-gold">{mode === 'login' ? 'Welcome' : 'Get'}</span>{' '}
+            <span className="italic text-accent">{mode === 'login' ? 'Welcome' : 'Get'}</span>{' '}
             {mode === 'login' ? 'back' : 'started'}
           </h1>
         </div>
@@ -77,7 +77,7 @@ export default function AuthPage({ mode }: Props) {
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             />
             {mode === 'register' && (
-              <p className="text-[11px] text-cream-100/40 mt-1">At least 6 characters</p>
+              <p className="text-[11px] text-text/40 mt-1">At least 6 characters</p>
             )}
           </div>
 
@@ -91,15 +91,15 @@ export default function AuthPage({ mode }: Props) {
             {busy ? '...' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
 
-          <p className="text-center text-xs text-cream-100/50 pt-2">
+          <p className="text-center text-xs text-text/50 pt-2">
             {mode === 'login' ? (
-              <>No account? <Link to="/register" className="text-amber-gold underline">Register</Link></>
+              <>No account? <Link to="/register" className="text-accent underline">Register</Link></>
             ) : (
-              <>Have an account? <Link to="/login" className="text-amber-gold underline">Sign in</Link></>
+              <>Have an account? <Link to="/login" className="text-accent underline">Sign in</Link></>
             )}
           </p>
           {mode === 'register' && (
-            <p className="text-center text-[10px] text-cream-100/30">
+            <p className="text-center text-[10px] text-text/30">
               First account becomes admin automatically.
             </p>
           )}
