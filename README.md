@@ -22,6 +22,7 @@ Quản lý cây thông tin cuộc họp hàng tuần (Nhóm → Thành viên →
 | **Deadline** với chip màu (today / tomorrow / overdue) | ✅ |
 | **Assignee** user + assignee note ("📌 Cần xong trước EOD") | ✅ |
 | Color cho từng nhóm (6 màu preset: amber/rose/emerald/sky/violet/slate) | ✅ |
+| Color riêng cho từng thành viên (6 màu preset) | ✅ |
 | **Light / Dark theme toggle** (lưu vào server + localStorage) | ✅ |
 | Comments / discussion trên task | ✅ |
 | Tạo meeting mới với carry-over (giữ sub-task + deadline + assignee) | ✅ |

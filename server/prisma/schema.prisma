@@ -76,6 +76,7 @@ model Group {
 model Member {
   id        String   @id @default(cuid())
   name      String   @db.VarChar(120)
+  color     String   @default("sky") @db.VarChar(20) // member color key
   position  Int      @default(0)
   groupId   String
   userId    String?

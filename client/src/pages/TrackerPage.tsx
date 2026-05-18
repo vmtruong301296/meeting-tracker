@@ -7,7 +7,7 @@ import { api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { STATUS, STATUS_ORDER, fmtDate, todayInput, colorHex } from '../lib/status';
 import type {
-  Meeting, MeetingSummary, Task, TaskStatus, TaskComment, UserRef, GroupColor,
+  Meeting, MeetingSummary, Task, TaskStatus, TaskComment, UserRef, GroupColor, MemberColor,
 } from '../types';
 import { GroupBlock } from '../components/GroupBlock';
 import { ProgressRing } from '../components/ProgressRing';
@@ -118,6 +118,9 @@ export default function TrackerPage() {
     },
     renameMember: async (id: string, name: string) => {
       await api(`/members/${id}`, { method: 'PATCH', body: { name } }); await refresh();
+    },
+    setMemberColor: async (id: string, color: MemberColor) => {
+      await api(`/members/${id}`, { method: 'PATCH', body: { color } }); await refresh();
     },
     deleteMember: async (id: string) => {
       await api(`/members/${id}`, { method: 'DELETE' }); await refresh();

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, Palette } from 'lucide-react';
 import { TaskRow } from './TaskRow';
 import { dialogConfirm, dialogPrompt } from './Modal';
-import { GROUP_COLORS, colorHex } from '../lib/status';
-import type { Group, Member, Task, UserRef, GroupColor } from '../types';
+import { GROUP_COLORS, MEMBER_COLORS, colorHex, memberColorHex } from '../lib/status';
+import type { Group, Member, Task, UserRef, GroupColor, MemberColor } from '../types';
 
 interface GroupActions {
   renameGroup: (gid: string, name: string) => Promise<void>;
@@ -12,6 +12,7 @@ interface GroupActions {
   toggleGroup: (gid: string) => Promise<void>;
   addMember: (gid: string, name: string) => Promise<void>;
   renameMember: (mid: string, name: string) => Promise<void>;
+  setMemberColor: (mid: string, color: MemberColor) => Promise<void>;
   deleteMember: (mid: string) => Promise<void>;
   addTask: (mid: string, title: string) => Promise<void>;
   addSubtask: (parentId: string, title: string) => Promise<void>;
@@ -123,11 +124,13 @@ export function GroupBlock({
 function MemberBlock({
   member, users, actions,
 }: { member: Member; users: UserRef[]; actions: GroupActions }) {
+  const [pickerOpen, setPickerOpen] = useState(false);
   const allTasks = [
     ...member.tasks,
     ...member.tasks.flatMap((t) => t.subtasks ?? []),
   ];
   const done = allTasks.filter((t) => t.status === 'DONE').length;
+  const hex = memberColorHex(member.color);
 
   const onRename = async () => {
     const n = await dialogPrompt('Rename member', member.name);
@@ -147,13 +150,13 @@ function MemberBlock({
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center font-serif italic font-semibold text-xs"
           style={{
-            background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%)',
+            background: `linear-gradient(135deg, ${hex} 0%, color-mix(in srgb, ${hex} 70%, #0f172a) 100%)`,
             color: 'var(--accent-on)',
           }}
         >
           {member.name.trim().split(/\s+/).pop()?.charAt(0).toUpperCase() || '?'}
         </div>
-        <div className="font-medium text-sm">{member.name}</div>
+        <div className="font-medium text-sm" style={{ color: hex }}>{member.name}</div>
         <span
           className="font-mono text-[10px] text-muted px-1.5 py-0.5 rounded"
           style={{ background: 'var(--bg-elev-2)' }}
@@ -161,6 +164,40 @@ function MemberBlock({
           {done}/{allTasks.length}
         </span>
         <div className="ml-auto flex gap-0.5">
+          <div className="relative">
+            <button
+              className="btn-mini"
+              onClick={() => setPickerOpen((s) => !s)}
+              title="Member color"
+              style={{ color: hex }}
+            >
+              <Palette size={11} />
+            </button>
+            {pickerOpen && (
+              <div
+                className="absolute right-0 top-full mt-1 p-2 rounded border border-base shadow-lg z-10 grid grid-cols-3 gap-1.5 bg-modal"
+              >
+                {MEMBER_COLORS.map((c) => (
+                  <button
+                    key={c.key}
+                    onClick={async () => {
+                      await actions.setMemberColor(member.id, c.key);
+                      setPickerOpen(false);
+                    }}
+                    className={`w-5 h-5 rounded-full border-2 transition ${
+                      member.color === c.key ? 'scale-110' : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                    style={{
+                      background: c.hex,
+                      borderColor: member.color === c.key ? c.hex : 'transparent',
+                      boxShadow: member.color === c.key ? `0 0 0 2px var(--bg-base)` : 'none',
+                    }}
+                    title={c.label}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
           <button className="btn-mini" onClick={onRename}><Edit3 size={11} /></button>
           <button className="btn-mini" onClick={onAddTask} title="Add task"><Plus size={11} /></button>
           <button className="btn-mini hover:!text-red-400" onClick={onDelete}><Trash2 size={11} /></button>

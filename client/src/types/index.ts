@@ -2,6 +2,7 @@ export type Role = 'ADMIN' | 'MEMBER';
 export type Theme = 'DARK' | 'LIGHT';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ISSUE' | 'CANCELLED';
 export type GroupColor = 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'slate';
+export type MemberColor = 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'slate';
 
 export interface User {
   id: string;
@@ -40,6 +41,7 @@ export interface Task {
 export interface Member {
   id: string;
   name: string;
+  color: MemberColor;
   position: number;
   groupId: string;
   userId: string | null;

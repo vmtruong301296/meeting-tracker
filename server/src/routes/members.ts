@@ -6,6 +6,10 @@ import { requireAuth } from '../middleware/auth';
 const router = Router();
 router.use(requireAuth);
 
+const MEMBER_COLORS = ['sky', 'violet', 'rose', 'emerald', 'amber', 'slate'] as const;
+
+const pickMemberColor = (position: number) => MEMBER_COLORS[position % MEMBER_COLORS.length];
+
 async function checkMemberAccess(memberId: string, userId: string, role: string) {
   const m = await prisma.member.findUnique({
     where: { id: memberId },
@@ -20,11 +24,12 @@ const createSchema = z.object({
   groupId: z.string(),
   name: z.string().min(1).max(120),
   userId: z.string().nullable().optional(),
+  color: z.enum(MEMBER_COLORS).optional(),
 });
 
 router.post('/', async (req, res, next) => {
   try {
-    const { groupId, name, userId } = createSchema.parse(req.body);
+    const { groupId, name, userId, color } = createSchema.parse(req.body);
     const g = await prisma.group.findUnique({
       where: { id: groupId },
       select: { meeting: { select: { ownerId: true } } },
@@ -35,7 +40,13 @@ router.post('/', async (req, res, next) => {
     }
     const count = await prisma.member.count({ where: { groupId } });
     const member = await prisma.member.create({
-      data: { groupId, name, userId: userId || null, position: count },
+      data: {
+        groupId,
+        name,
+        userId: userId || null,
+        position: count,
+        color: color ?? pickMemberColor(count),
+      },
       include: { tasks: true },
     });
     res.status(201).json({ member });
@@ -47,6 +58,7 @@ router.post('/', async (req, res, next) => {
 const updateSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   userId: z.string().nullable().optional(),
+  color: z.enum(MEMBER_COLORS).optional(),
   position: z.number().int().optional(),
 });
 

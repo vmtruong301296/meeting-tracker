@@ -189,7 +189,13 @@ router.post('/', async (req, res, next) => {
             });
             for (const [mi, m] of g.members.entries()) {
               const newM = await tx.member.create({
-                data: { name: m.name, position: mi, groupId: newG.id, userId: m.userId },
+                data: {
+                  name: m.name,
+                  color: m.color,
+                  position: mi,
+                  groupId: newG.id,
+                  userId: m.userId,
+                },
               });
               const pending = m.tasks.filter((t) => t.status !== 'DONE' && t.status !== 'CANCELLED');
               for (const [ti, t] of pending.entries()) {
